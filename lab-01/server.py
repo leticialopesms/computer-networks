@@ -4,6 +4,8 @@ import threading
 import sys  # In order to terminate the program
 
 def handle_client(connectionSocket):
+    thread_id = threading.get_ident()
+    print(f"[DEBUG] Client connected on thread ID: {thread_id}")
     try:
         message = connectionSocket.recv(1024).decode()
         filename = message.split()[1]
@@ -20,6 +22,7 @@ def handle_client(connectionSocket):
         outputdata = f.read()
         connectionSocket.sendall(outputdata.encode())
     # Close client socket
+    print(f"[DEBUG] Client closed on thread ID: {thread_id}")
     connectionSocket.close()
 
 def main():
@@ -29,7 +32,7 @@ def main():
     serverPort = 12000
     serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1) # Allow reuse of the address
     serverSocket.bind((serverAddress, serverPort)) # Bind the socket to the server address and server port
-    serverSocket.listen(1) # Listen for incoming connections
+    serverSocket.listen() # Listen for incoming connections
 
     while True:
         # Establish the connection
@@ -45,9 +48,6 @@ def main():
         except KeyboardInterrupt:
             serverSocket.close()
             sys.exit()  # Terminate the program
-
-    serverSocket.close()
-    sys.exit()  # Terminate the program
 
 if __name__ == "__main__":
     main()
