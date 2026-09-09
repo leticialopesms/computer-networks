@@ -1,16 +1,15 @@
-# import socket module
 from socket import *
 import threading
-import sys  # In order to terminate the program
+import sys
 
 def handle_client(connectionSocket):
-    thread_id = threading.get_ident()
+    thread_id = threading.get_ident()   # Get the thread ID for debug
     print(f"[DEBUG] Client connected on thread ID: {thread_id}")
     try:
         message = connectionSocket.recv(1024).decode()
         filename = message.split()[1]
-        f = open(filename[1:])
-        outputdata =  f.read() # Read file
+        f = open(filename[1:])  # Open file
+        outputdata =  f.read()  # Read file
         # Send one HTTP header line into socket
         connectionSocket.send("HTTP/1.1 200 OK\r\n\r\n".encode())
         # Send the content of the requested file to the client
@@ -18,11 +17,12 @@ def handle_client(connectionSocket):
     except IOError:
         # Send response message for file not found
         connectionSocket.send("HTTP/1.1 404 Not Found\r\n\r\n".encode())
+        # Send the content of the 404 error page to the client
         f = open('404.html')
         outputdata = f.read()
         connectionSocket.sendall(outputdata.encode())
-    # Close client socket
     print(f"[DEBUG] Client closed on thread ID: {thread_id}")
+    # Close client socket
     connectionSocket.close()
 
 def main():
